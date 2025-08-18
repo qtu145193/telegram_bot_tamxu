@@ -13,7 +13,8 @@ from dotenv import load_dotenv
 from .handlers.check_tsx_pool import pool_token_txns, pool_txns_handler
 from .handlers.two_weeks_result import check_result, refund
 from .handlers.roll import roll3, roll3_cham
-
+import threading
+from flask import Flask
 # === CONFIG ===
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
@@ -127,5 +128,14 @@ def main():
     app.run_polling()
 
 
+def run_flask():
+    app = Flask(__name__)
+    @app.route("/")
+    def home():
+        return "Bot is running!"
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+
 if __name__ == '__main__':
+    threading.Thread(target=run_flask).start()
     main()
