@@ -1,8 +1,14 @@
+import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from web3 import Web3
 from datetime import datetime, timedelta
 from collections import defaultdict
+import os
+
+# === CONFIG ===
+API_KEY = os.getenv('API_KEY')
+BSCSCAN_API_URL = os.getenv('BSCSCAN_API_URL', 'https://api.bscscan.com/api')
 
 w3 = Web3(Web3.HTTPProvider("https://rpc5.viction.xyz/"))  # Thay URL node
 
@@ -11,7 +17,7 @@ TOKEN_CONTRACT = "0x39dda3a886196148a7f295E1876BdfBE1424D147".lower()
 
 async def pool_token_txns(update: Update, context: ContextTypes.DEFAULT_TYPE):
     rows = context.bot_data.get("rows", [])
-    pool_rows = [r for r in rows if "pool" in r["Tên"].lower()]
+    pool_rows = [r for r in rows if "pool" in r.get("Tên", "").lower()]
     if not pool_rows:
         await update.message.reply_text("❌ Không có pool nào.")
         return
@@ -53,11 +59,11 @@ async def pool_txns_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     txns_today = []
     for tx in data.get("result", []):
         # Lọc theo timestamp trong ngày
-        ts = int(tx["timeStamp"])
+        ts = int(tx.get("timeStamp", 0))
         if not (start_ts <= ts < end_ts):
             continue
         # Lọc theo contract token
-        if tx["contractAddress"].lower() != TOKEN_CONTRACT:
+        if tx.get("contractAddress", "").lower() != TOKEN_CONTRACT:
             continue
         txns_today.append(tx)
 
@@ -67,11 +73,11 @@ async def pool_txns_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     lines = [f"💸 Token transactions hôm nay gửi tới pool {pool_address}:\n"]
     for tx in txns_today:
-        token_symbol = tx["tokenSymbol"]
-        token_name = tx["tokenName"]
-        decimals = int(tx["tokenDecimal"])
-        value = int(tx["value"]) / (10 ** decimals)
-        from_addr = tx["from"]
+        token_symbol = tx.get("tokenSymbol", "?")
+        token_name = tx.get("tokenName", "?")
+        decimals = int(tx.get("tokenDecimal", 18))
+        value = int(tx.get("value", 0)) / (10 ** decimals)
+        from_addr = tx.get("from", "?")
         lines.append(f"- Từ {from_addr}: {value:.4f} {token_symbol}")
 
     await query.edit_message_text("\n".join(lines))
