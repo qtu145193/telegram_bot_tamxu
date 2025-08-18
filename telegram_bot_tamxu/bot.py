@@ -32,6 +32,7 @@ if not google_credentials:
 creds_dict = json.loads(google_credentials)
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
+sheet = client.open_by_url(SHEET_URL).sheet1
 
 w3 = Web3(Web3.HTTPProvider(WEB3_RPC))
 
@@ -99,6 +100,7 @@ def main():
     app.add_handler(CommandHandler("lac_cham", roll3_cham))
     app.add_handler(CommandHandler("help", help_handler))
     app.run_polling()
+
 
 if __name__ == '__main__':
     main()
