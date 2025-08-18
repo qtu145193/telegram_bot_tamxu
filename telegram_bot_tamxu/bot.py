@@ -5,11 +5,10 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from web3 import Web3
 from .handlers.balance import check_balance, check_pool
-from .handlers.member import add_member, remove_member
 from .handlers.multi_send import multi_send_prepare, multi_send_button_handler, handle_number_input
 from .handlers.pool import pool_to_day, pool_button_handler, show_pool_buttons, show_pool_button_handler
 from .handlers.help import help_handler
-import os
+import os, json
 from dotenv import load_dotenv
 from .handlers.check_tsx_pool import pool_token_txns, pool_txns_handler
 from .handlers.two_weeks_result import check_result, refund
@@ -26,23 +25,29 @@ GOOGLE_CREDENTIALS_PATH = os.getenv('GOOGLE_CREDENTIALS_PATH')
 # === GOOGLE SHEET ===
 scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
          "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name(r'D:\GitTool\bot_telegram\bot_telegram\credentials.json', scope)
+google_credentials = os.getenv("GOOGLE_CREDENTIALS")
+if not google_credentials:
+    raise ValueError("⚠️ Missing GOOGLE_CREDENTIALS environment variable")
+
+creds_dict = json.loads(google_credentials)
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
-sheet = client.open_by_url(SHEET_URL).sheet1
-creds = ServiceAccountCredentials.from_json_keyfile_name(GOOGLE_CREDENTIALS_PATH, scope)
 
 w3 = Web3(Web3.HTTPProvider(WEB3_RPC))
 
 logging.basicConfig(level=logging.INFO)
 
+
 def get_rows(sheet):
     return sheet.get_all_records()
+
 
 async def on_startup(application):
     # Hàm chạy sau khi bot khởi động
     rows = get_rows(sheet)
     application.bot_data['rows'] = rows
     print(f"Đã lưu {len(rows)} dòng rows vào bot_data")
+
 
 async def start(update, context):
     keyboard = [
@@ -55,6 +60,7 @@ async def start(update, context):
         reply_markup=reply_markup
     )
 
+
 async def update_sheet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         rows = get_rows(sheet)
@@ -62,6 +68,7 @@ async def update_sheet(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"✅ Đã cập nhật dữ liệu từ Google Sheet, tổng {len(rows)} dòng.")
     except Exception as e:
         await update.message.reply_text(f"❌ Lỗi cập nhật dữ liệu: {e}")
+
 
 def main():
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
