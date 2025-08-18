@@ -32,7 +32,7 @@ if not google_credentials:
 creds_dict = json.loads(google_credentials)
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
-sheet = client.open_by_url(SHEET_URL).sheet1
+sheet = client.open_by_url(SHEET_URL).worksheet("Address")
 
 w3 = Web3(Web3.HTTPProvider(WEB3_RPC))
 
