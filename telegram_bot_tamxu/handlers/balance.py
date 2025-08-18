@@ -16,14 +16,19 @@ async def check_balance(update: Update, context: ContextTypes.DEFAULT_TYPE, w3):
 
     results = []
     for row in rows:
+        # Ensure row is a dict
+        if not isinstance(row, dict):
+            continue
+
+        # Try multiple possible header variants
+        name = row.get("Tên") or row.get("Ten") or row.get("Name") or "Unknown"
+        if "pool" in name.lower():
+            continue
+
+        address = row.get("Viction Address") or row.get("Address") or ""
         try:
-            name = row['Tên']
-            if "pool" in name.lower():
-                continue
-            address = row['Viction Address']
             balance = get_token_balance(w3, token_address, address)
             diff = balance - base_value
-
             results.append({
                 "name": name,
                 "address": address,
@@ -32,22 +37,23 @@ async def check_balance(update: Update, context: ContextTypes.DEFAULT_TYPE, w3):
             })
         except Exception as e:
             results.append({
-                "name": row.get("Tên", "Unknown"),
-                "address": row.get("Viction Address", ""),
+                "name": name,
+                "address": address,
                 "error": str(e)
             })
 
+    # Split results
     win_results = [r for r in results if 'error' not in r and r['diff'] >= 0]
     lose_results = [r for r in results if 'error' not in r and r['diff'] < 0]
     error_results = [r for r in results if 'error' in r]
 
-    # Gắn icon 🥇🥈🥉 cho top 3
+    # Add medals
     win_results.sort(key=lambda r: r['balance'], reverse=True)
     medals = ['🥇', '🥈', '🥉']
     for i, r in enumerate(win_results[:3]):
         r['medal'] = medals[i]
 
-    # Format bảng WIN
+    # Format WIN table
     win_lines = [
         "*👑 NGÀI:*",
         "```",
@@ -62,10 +68,8 @@ async def check_balance(update: Update, context: ContextTypes.DEFAULT_TYPE, w3):
         win_lines.append(f"{icon} {name}  {balance}  {change}")
     win_lines.append("```")
 
-    # Sort LOSE từ thấp -> cao
+    # Format LOSE table
     lose_results.sort(key=lambda r: r['balance'])
-
-    # Format bảng LOSE
     lose_lines = [
         "*💀 NGHIỆN:*",
         "```",
@@ -79,7 +83,7 @@ async def check_balance(update: Update, context: ContextTypes.DEFAULT_TYPE, w3):
         lose_lines.append(f"💀 {name}  {balance}  {change}")
     lose_lines.append("```")
 
-    # Gửi tin nhắn
+    # Send messages
     if win_results:
         await update.message.reply_text("\n".join(win_lines), parse_mode="Markdown")
     if lose_results:

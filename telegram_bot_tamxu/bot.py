@@ -40,14 +40,39 @@ logging.basicConfig(level=logging.INFO)
 
 
 def get_rows(sheet):
-    return sheet.get_all_records()
+    try:
+        # Nếu header trong sheet không chuẩn, định nghĩa thủ công
+        expected_headers = ["No","Tên", "Viction Address", "ONEID"]  # sửa theo sheet của bạn
+        rows = sheet.get_all_records(expected_headers=expected_headers)
+        print(f"Đã lấy {len(rows)} rows từ sheet.")
+        return rows
+    except Exception as e:
+        print("Lỗi khi lấy rows từ sheet:", e)
+        # Nếu có lỗi, lấy tất cả giá trị và xử lý thủ công
+        all_values = sheet.get_all_values()
+        if not all_values or len(all_values) < 2:
+            return []
+        headers = all_values[1]  # row đầu tiên
+        data_rows = all_values[2:]
+        rows = []
+        for r in data_rows:
+            row_dict = {headers[i] if i < len(headers) else f"Column{i}": r[i] if i < len(r) else "" for i in range(len(headers))}
+            rows.append(row_dict)
+        return rows
+
 
 
 async def on_startup(application):
-    # Hàm chạy sau khi bot khởi động
-    rows = get_rows(sheet)
-    application.bot_data['rows'] = rows
-    print(f"Đã lưu {len(rows)} dòng rows vào bot_data")
+    try:
+        rows = get_rows(sheet)
+        application.bot_data['rows'] = rows
+        print(f"Đã lưu {len(rows)} dòng rows vào bot_data\n")
+
+        # In từng dòng dữ liệu để debug
+        for i, row in enumerate(rows, start=1):
+            print(f"Row {i}: {row}")
+    except Exception as e:
+        print("Lỗi khi lấy hoặc in rows:", e)
 
 
 async def start(update, context):
@@ -57,7 +82,7 @@ async def start(update, context):
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     await update.message.reply_text(
-        "Chọn ocn đường để đi   :",
+        "Chọn con đường để đi   :",
         reply_markup=reply_markup
     )
 
