@@ -97,7 +97,7 @@ def main():
     app.add_handler(CommandHandler("check_result",  lambda u, c: check_result(u, c, w3)))
     app.add_handler(CommandHandler("refund",  lambda u, c: check_result(u, c, w3)))
     app.add_handler(CommandHandler("lac_xuc_xac", roll3))
-    app.add_handler(CommandHandler("lac_cham", roll3_cham))
+    # app.add_handler(CommandHandler("lac_cham", roll3_cham))
     app.add_handler(CommandHandler("help", help_handler))
     app.run_polling()
 
