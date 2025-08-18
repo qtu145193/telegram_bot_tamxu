@@ -23,14 +23,14 @@ async def check_result(update: Update, context: ContextTypes.DEFAULT_TYPE, w3):
 
     for row in rows:
         try:
-            name = row.get("Name", "").strip()
+            name = row.get("Tên", "").strip()
             if not name:
                 continue
             # nếu vẫn muốn bỏ pool thì giữ dòng dưới, nếu không muốn bỏ thì xóa dòng này
             if "pool" in name.lower():
                 continue
 
-            address = row.get("Address", "").strip()
+            address = row.get("AdViction Addressdress", "").strip()
             balance = get_token_balance(w3, token_address, address) or 0
             balance = int(balance)
             diff = balance - base_value
@@ -46,7 +46,7 @@ async def check_result(update: Update, context: ContextTypes.DEFAULT_TYPE, w3):
                 "diff": diff
             })
         except Exception as e:
-            errors.append(f"{row.get('Name')} ({row.get('Address')}): {str(e)}")
+            errors.append(f"{row.get('Tên')} ({row.get('Viction Address')}): {str(e)}")
 
     positives = [r for r in results if r["diff"] > 0]
     negatives = [r for r in results if r["diff"] < 0]
@@ -105,10 +105,10 @@ async def refund(update: Update, context: ContextTypes.DEFAULT_TYPE, w3):
     output_lines = []
     names = []
     for row in rows:
-        name = row.get("Name", "")
+        name = row.get("Tên", "")
         if "pool" in name.lower():
             continue
-        address = row.get("Address", "")
+        address = row.get("Viction Address", "")
         balance = get_token_balance(w3, token_address, address)
         if balance < base_value:
             amount_needed = base_value - balance

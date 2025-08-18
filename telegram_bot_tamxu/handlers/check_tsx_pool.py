@@ -11,13 +11,13 @@ TOKEN_CONTRACT = "0x39dda3a886196148a7f295E1876BdfBE1424D147".lower()
 
 async def pool_token_txns(update: Update, context: ContextTypes.DEFAULT_TYPE):
     rows = context.bot_data.get("rows", [])
-    pool_rows = [r for r in rows if "pool" in r["Name"].lower()]
+    pool_rows = [r for r in rows if "pool" in r["Tên"].lower()]
     if not pool_rows:
         await update.message.reply_text("❌ Không có pool nào.")
         return
 
     buttons = [
-        [InlineKeyboardButton(r["Name"], callback_data=f"pool_txns|{r['Address']}")]
+        [InlineKeyboardButton(r["Tên"], callback_data=f"pool_txns|{r['Viction Address']}")]
         for r in pool_rows
     ]
 

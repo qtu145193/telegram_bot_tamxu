@@ -4,7 +4,7 @@ from telegram.ext import ContextTypes, MessageHandler, filters
 # Khởi tạo multi send
 async def multi_send_prepare(update: Update, context: ContextTypes.DEFAULT_TYPE, multiplier: int):
     rows = context.bot_data.get("rows", [])
-    names = [row["Name"] for row in rows if "pool" not in row.get("Name", "").lower()]
+    names = [row["Tên"] for row in rows if "pool" not in row.get("Tên", "").lower()]
     context.user_data["multi_send_counts"] = {name: 0 for name in names}
     context.user_data["multiplier"] = multiplier
     await send_multi_send_buttons(update, context.user_data["multi_send_counts"])
@@ -72,9 +72,9 @@ async def send_multi_send_result(update_or_query, context):
 
     for name, count in counts.items():
         if count > 0:
-            matched_row = next((row for row in rows if row.get("Name", "").strip() == name), None)
+            matched_row = next((row for row in rows if row.get("Tên", "").strip() == name), None)
             if matched_row:
-                address = matched_row.get("Address", "").strip()
+                address = matched_row.get("Viction Address", "").strip()
                 amount = count * multiplier
                 output_lines.append(f"{address}?{amount}")
                 names.append(name)

@@ -17,10 +17,10 @@ async def check_balance(update: Update, context: ContextTypes.DEFAULT_TYPE, w3):
     results = []
     for row in rows:
         try:
-            name = row['Name']
+            name = row['Tên']
             if "pool" in name.lower():
                 continue
-            address = row['Address']
+            address = row['Viction Address']
             balance = get_token_balance(w3, token_address, address)
             diff = balance - base_value
 
@@ -32,8 +32,8 @@ async def check_balance(update: Update, context: ContextTypes.DEFAULT_TYPE, w3):
             })
         except Exception as e:
             results.append({
-                "name": row.get("Name", "Unknown"),
-                "address": row.get("Address", ""),
+                "name": row.get("Tên", "Unknown"),
+                "address": row.get("Viction Address", ""),
                 "error": str(e)
             })
 
@@ -96,11 +96,11 @@ async def check_pool(update: Update, context: ContextTypes.DEFAULT_TYPE, w3):
 
     for row in rows:
         try:
-            name = row['Name']
+            name = row['Tên']
             if "pool" not in name.lower():
                 continue
 
-            user_address = row['Address']
+            user_address = row['Viction Address']
             token_balance = get_token_balance(w3, token_address, user_address)
 
             formatted_balance = format_compact(token_balance)
@@ -112,6 +112,6 @@ async def check_pool(update: Update, context: ContextTypes.DEFAULT_TYPE, w3):
             reply_lines.append(line)
 
         except Exception as e:
-            reply_lines.append(f"{row.get('Name')} ({row.get('Address')}): ❌ Lỗi: {str(e)}")
+            reply_lines.append(f"{row.get('Tên')} ({row.get('Viction Address')}): ❌ Lỗi: {str(e)}")
 
     await update.message.reply_text("\n".join(reply_lines), parse_mode="Markdown")

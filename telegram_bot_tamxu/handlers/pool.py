@@ -5,7 +5,7 @@ from pathlib import Path
 # Hàm khởi tạo
 async def pool_to_day(update: Update, context: ContextTypes.DEFAULT_TYPE):
     rows = context.bot_data.get("rows", [])
-    names = [row["Name"] for row in rows if "pool" not in row.get("Name", "").lower()]
+    names = [row["Tên"] for row in rows if "pool" not in row.get("Tên", "").lower()]
     context.user_data["pool_counts"] = {name: 0 for name in names}
     await send_pool_buttons(update, context.user_data["pool_counts"])
 
@@ -104,8 +104,8 @@ async def show_pool_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     buttons = [
-        [InlineKeyboardButton(row["Name"], callback_data=f"pool_{row['Address']}")]
-        for row in rows if "pool" in row["Name"].lower()
+        [InlineKeyboardButton(row["Tên"], callback_data=f"pool_{row['Viction Address']}")]
+        for row in rows if "pool" in row["Tên"].lower()
     ]
 
     if not buttons:
@@ -127,10 +127,10 @@ async def show_pool_button_handler(update: Update, context: ContextTypes.DEFAULT
     await query.message.reply_text(f"{address}: Đang tìm")
 
     rows = context.bot_data.get("rows", [])
-    matched_row = next((row for row in rows if row["Address"].strip().lower() == address.lower()), None)
+    matched_row = next((row for row in rows if row["Viction Address"].strip().lower() == address.lower()), None)
 
     if matched_row:
-        name = matched_row["Name"]
+        name = matched_row["Tên"]
         image_path = Path("D:/GitTool/bot_telegram/bot_telegram/img") / f"{address}.jpg"
         print(f"[DEBUG] Đường dẫn ảnh: {image_path}")
 
